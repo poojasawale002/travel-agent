@@ -170,7 +170,7 @@ public class TripController {
 	@PatchMapping("/{id}/budget")
 	public ResponseEntity<Trip> updateBudget(
 	        @PathVariable Long id,
-	        @RequestParam Double budget) {
+	        @Valid @RequestParam Double budget) {
 
 	    Trip trip = tripService.updateBudget(id, budget);
 

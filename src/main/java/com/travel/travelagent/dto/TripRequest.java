@@ -1,5 +1,6 @@
 package com.travel.travelagent.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -13,11 +14,11 @@ public class TripRequest {
     private String destination;
 
 	 @NotNull(message = "Days are required")
-	 @Positive(message = "Days must be greater than zero")
+	 @Min(value = 1, message = "Days must be at least 1")
 	 private Integer days;
 
 	 @NotNull(message = "Budget is required")
-	 @Positive(message = "Budget must be greater than zero")
+	 @Min(value = 1000, message = "Budget should be at least 1000")
 	 private Double budget;
 	
 	public String getSource() {
