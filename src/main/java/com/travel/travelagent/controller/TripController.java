@@ -3,10 +3,15 @@ package com.travel.travelagent.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.travel.travelagent.dto.TripRequest;
 import com.travel.travelagent.entity.Trip;
+import com.travel.travelagent.repository.TripRepository;
 import com.travel.travelagent.service.TripService;
 
 import org.springframework.http.ResponseEntity;
@@ -30,10 +36,48 @@ public class TripController {
 	@Autowired
 	private TripService tripService;
 	
-	@GetMapping
-    public List<Trip> getAllTrips() {
-        return tripService.getAllTrips();
-    }
+	@Autowired
+	private TripRepository tripRepository;
+	
+
+	
+//	@GetMapping
+//    public List<Trip> getAllTrips() {
+//        return tripService.getAllTrips();
+//    }
+	@GetMapping("/page")
+	public Page<Trip> getTrips(Pageable pageable) {
+		return tripService.getAllTrips(pageable);
+		
+	}
+	
+	// sort trips in ascending
+	@GetMapping("/sort")
+	public List<Trip> sortTrips() {
+	    return tripRepository.findAll(Sort.by("budget"));
+	}
+	
+	//sort trips in descending
+	@GetMapping("/sort/desc")
+	public List<Trip> sortTripsDesc() {
+	    return tripRepository.findAll(
+	            Sort.by(Sort.Direction.DESC, "budget"));
+	}
+	
+	//sorting based on field
+	@GetMapping("/sort/field")
+	public List<Trip> sortTrips(
+	        @RequestParam String field) {
+
+	    return tripRepository.findAll(Sort.by(field));
+	}
+	
+	// pagination+sorting
+	@GetMapping("/page-sort")
+	public Page<Trip> pageSort(Pageable pageable) {
+	    return tripRepository.findAll(pageable);
+	}
+	
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -112,7 +156,27 @@ public class TripController {
 	@GetMapping("/budget/desc")
 	public List<Trip> getTripsSortedByBudgetDesc() {
 	    return tripService.getTripsSortedByBudgetDesc();
+	}	
+	
+	// updating all values
+	@PutMapping("/{id}")
+	public ResponseEntity<Trip> updateTrip(@PathVariable Long id,@Valid @RequestBody TripRequest request){
+		Trip updatedTrip = tripService.updateTrip(id, request);
+		
+		return ResponseEntity.ok(updatedTrip);
 	}
+	
+	//updating only budget
+	@PatchMapping("/{id}/budget")
+	public ResponseEntity<Trip> updateBudget(
+	        @PathVariable Long id,
+	        @RequestParam Double budget) {
+
+	    Trip trip = tripService.updateBudget(id, budget);
+
+	    return ResponseEntity.ok(trip);
+	}
+	
 	
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -121,4 +185,26 @@ public class TripController {
 		
 		return "Trip deleted";
 	}
+	
+	@PostMapping("/destinations")
+	public Trip saveTrips(@RequestBody Trip trip){
+
+	    return tripService.saveTrips(trip);
+
+	}
+	
+	@GetMapping("/jpql/budget")
+	public List<Trip> getBudget(@RequestParam Double budget){
+	    return tripService.getTripsGreaterThan(budget);
+	}
+
+	@GetMapping("/jpql/source")
+	public List<Trip> getSource(@RequestParam String source){
+	    return tripService.getTripsBySourceJPQL(source);
+	}
+
+	@GetMapping("/jpql/destination")
+	public List<Trip> searchDestination(@RequestParam String destination){
+	    return tripService.searchDestination(destination);
+	}	
 }

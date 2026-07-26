@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.travel.travelagent.entity.Trip;
@@ -30,5 +32,14 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
     List<Trip> findByOrderByBudgetAsc();
 
 	List<Trip> findByOrderByBudgetDesc();
+	
+	@Query("SELECT t FROM Trip t WHERE t.budget > :budget")
+	List<Trip> findTripsGreaterThanBudget(@Param		("budget") Double budget);
+
+	@Query("SELECT t FROM Trip t WHERE t.source = :source")
+	List<Trip> findTripsBySource(@Param("source") String source);
+
+	@Query("SELECT t FROM Trip t WHERE t.destination LIKE %:destination%")
+	List<Trip> searchDestination(@Param("destination") String destination);
     
 }

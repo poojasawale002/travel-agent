@@ -1,6 +1,8 @@
 package com.travel.travelagent.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class TripRequest {
 	
@@ -9,8 +11,15 @@ public class TripRequest {
 	
 	@NotBlank(message="Destination cannnot be empty")
     private String destination;
-    private int days;
-    private double budget;
+
+	 @NotNull(message = "Days are required")
+	 @Positive(message = "Days must be greater than zero")
+	 private Integer days;
+
+	 @NotNull(message = "Budget is required")
+	 @Positive(message = "Budget must be greater than zero")
+	 private Double budget;
+	
 	public String getSource() {
 		return source;
 	}

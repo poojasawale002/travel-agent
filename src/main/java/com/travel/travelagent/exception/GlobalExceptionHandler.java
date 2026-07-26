@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String,String> handleValidation(MethodArgumentNotValidException ex){
 		
 		Map<String,String> errors=new HashMap<>();
@@ -32,4 +34,12 @@ public class GlobalExceptionHandler {
 	    return ex.getMessage();
 
 	}
+	
+	@ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
 }
