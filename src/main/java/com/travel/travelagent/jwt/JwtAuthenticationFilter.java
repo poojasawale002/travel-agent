@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                System.out.println("JWT Authentication Successful: " + email);
+                logger.info("JWT Authentication successful for {}");
             }
         }
 

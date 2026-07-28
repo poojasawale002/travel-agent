@@ -17,9 +17,15 @@ import com.travel.travelagent.exception.TripNotFoundException;
 import com.travel.travelagent.exception.UserNotFoundException;
 import com.travel.travelagent.repository.TripRepository;
 import com.travel.travelagent.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 	
 	@Service
 	public class TripService {
+		
+		private static final Logger logger =
+		        LoggerFactory.getLogger(TripService.class);
 	
 		@Autowired
 		private TripRepository tripRepository;
