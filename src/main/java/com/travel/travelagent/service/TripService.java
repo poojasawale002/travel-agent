@@ -69,8 +69,15 @@ import org.slf4j.LoggerFactory;
 		
 		public TripResponse getTripById(Long id) {
 
+		    logger.info("Fetching trip with ID {}", id);
+
 		    Trip trip = tripRepository.findById(id)
-		            .orElseThrow(() -> new RuntimeException("Trip not found"));
+		            .orElseThrow(() -> {
+		                logger.error("Trip not found with ID {}", id);
+		                return new TripNotFoundException("Trip not found");
+		            });
+
+		    logger.info("Trip fetched successfully");
 
 		    return convertToResponse(trip);
 		}
@@ -157,6 +164,9 @@ import org.slf4j.LoggerFactory;
 		
 		public TripResponse saveTrip(TripRequest request) {
 
+		    logger.info("Creating a new trip from {} to {}", 
+		            request.getSource(), request.getDestination());
+
 		    Trip trip = new Trip();
 
 		    trip.setSource(request.getSource());
@@ -166,21 +176,26 @@ import org.slf4j.LoggerFactory;
 
 		    Trip savedTrip = tripRepository.save(trip);
 
+		    logger.info("Trip created successfully with ID {}", savedTrip.getId());
+
 		    return convertToResponse(savedTrip);
 		}
+		
+		
 		// updating all fields
 		public TripResponse updateTrip(Long id, TripRequest request) {
 
 		    Trip trip = tripRepository.findById(id)
 		            .orElseThrow(() -> new TripNotFoundException("Trip not found"));
-
+		    
+		    logger.info("Updating trip with ID {}", id);
 		    trip.setSource(request.getSource());
 		    trip.setDestination(request.getDestination());
 		    trip.setDays(request.getDays());
 		    trip.setBudget(request.getBudget());
 
 		    Trip updatedTrip = tripRepository.save(trip);
-
+		    logger.info("Updating trip with ID {}", id);
 		    return convertToResponse(updatedTrip);
 		}
 		
@@ -189,11 +204,11 @@ import org.slf4j.LoggerFactory;
 
 		    Trip trip = tripRepository.findById(id)
 		            .orElseThrow(() -> new TripNotFoundException("Trip not found"));
-
+		    logger.info("Updating trip with ID {}", id);
 		    trip.setBudget(budget);
 
 		    Trip updatedTrip = tripRepository.save(trip);
-
+		    logger.info("Budget updated successfully");
 		    return convertToResponse(updatedTrip);
 		}
 		
@@ -202,8 +217,9 @@ import org.slf4j.LoggerFactory;
 	
 	
 			Trip trip = tripRepository.findById(id).orElseThrow(() -> new TripNotFoundException("Trip not found"));
-			
+			logger.info("Deleting trip {}", id);
 			tripRepository.delete(trip);
+			logger.info("Trip deleted successfully");	
 		}
 	
 		public TripResponse saveTrips(Trip trip) {
@@ -212,11 +228,11 @@ import org.slf4j.LoggerFactory;
 
 		    User user = userRepository.findById(userId)
 		            .orElseThrow(() -> new UserNotFoundException("User not found"));
-
+		    logger.info("Saving trip for user {}", userId);
 		    trip.setUser(user);
 
 		    Trip savedTrip = tripRepository.save(trip);
-
+		    logger.info("Trip saved successfully for user {}", userId);
 		    return convertToResponse(savedTrip);
 		}
 		
@@ -229,7 +245,7 @@ import org.slf4j.LoggerFactory;
 		}
 
 		public List<TripResponse> getTripsBySourceJPQL(String source){
-
+			logger.info("Searching trips by source	 {}", source);
 		    return tripRepository.findTripsBySource(source)
 		            .stream()
 		            .map(this::convertToResponse)
@@ -237,14 +253,14 @@ import org.slf4j.LoggerFactory;
 		}
 
 		public List<TripResponse> searchDestination(String destination){
-
+			logger.info("Searching trips by destination {}", destination);
 		    return tripRepository.searchDestination(destination)
 		            .stream()
 		            .map(this::convertToResponse)
 		            .toList();
 		}
 		public List<TripResponse> sortTrips() {
-
+			
 		    return tripRepository.findAll(Sort.by("budget"))
 		            .stream()
 		            .map(this::convertToResponse)
