@@ -1,25 +1,22 @@
 	package com.travel.travelagent.service;
 	
-	import java.util.HashMap;
-	import java.util.List;
-	import java.util.Map;
-	import java.util.Optional;
-	
-	import org.springframework.beans.factory.annotation.Autowired;
-	import org.springframework.data.domain.Page;
-	import org.springframework.data.domain.Pageable;
-	import org.springframework.data.domain.Sort;
-	import org.springframework.stereotype.Service;
-	import org.springframework.web.bind.annotation.GetMapping;
-	import org.springframework.web.bind.annotation.RequestParam;
-	
-	import com.travel.travelagent.dto.TripRequest;
-	import com.travel.travelagent.entity.Trip;
+import java.util.List;
+
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import com.travel.travelagent.dto.TripRequest;
+import com.travel.travelagent.dto.TripResponse;
+import com.travel.travelagent.entity.Trip;
 import com.travel.travelagent.entity.User;
 import com.travel.travelagent.exception.TripNotFoundException;
 import com.travel.travelagent.exception.UserNotFoundException;
 import com.travel.travelagent.repository.TripRepository;
-	import com.travel.travelagent.repository.UserRepository;
+import com.travel.travelagent.repository.UserRepository;
 	
 	@Service
 	public class TripService {
@@ -29,6 +26,9 @@ import com.travel.travelagent.repository.TripRepository;
 		
 		@Autowired
 		private UserRepository userRepository;
+		
+		@Autowired
+		private ModelMapper modelMapper;
 		
 		
 	//	public Map<String , Object> planTrip(TripRequest trip) {
@@ -41,100 +41,154 @@ import com.travel.travelagent.repository.TripRepository;
 	//		return response;
 	//	}
 	//	
-		public String createTrip(TripRequest request) {
-			
-			Trip t=new Trip();
-			
-			t.setSource(request.getSource());
-			t.setDestination(request.getDestination());
-			t.setBudget(request.getBudget());
-			t.setDays(request.getDays());
-			
-			tripRepository.save(t);
-			
-			return "Trip created successfully";
-		}
+		
 		
 	//	public List<Trip> getAllTrips() {
 	//        return tripRepository.findAll();
 	//    }
 	//	
 		
-		public Page<Trip> getAllTrips(Pageable pageable) {
-	        return tripRepository.findAll(pageable);
-	    }
+		private TripResponse convertToResponse(Trip trip) {
+
+		    return modelMapper.map(trip, TripResponse.class);
+
+		}
 		
-		public Trip getTripById(Long id) {
-			return tripRepository.findById(id).orElseThrow(()-> new TripNotFoundException("Trip Not Found"));
+		public Page<TripResponse> getAllTrips(Pageable pageable) {
+
+		    return tripRepository
+		            .findAll(pageable)
+		            .map(this::convertToResponse);
+		}
+		
+		public TripResponse getTripById(Long id) {
+
+		    Trip trip = tripRepository.findById(id)
+		            .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+		    return convertToResponse(trip);
 		}
 	
-		public List<Trip> getTripBySource(String source) {
-			return tripRepository.findBySource(source);
+		public List<TripResponse> getTripBySource(String source) {
+
+		    return tripRepository.findBySource(source)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public List<Trip> getTripByDestination(String destination) {
-			return tripRepository.findByDestination(destination);
+		public List<TripResponse> getTripByDestination(String destination) {
+
+		    return tripRepository.findByDestination(destination)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
+		}
+
+
+		public List<TripResponse> getTripByBudget(Double budget) {
+
+		    return tripRepository.findByBudgetLessThan(budget)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public List<Trip> getTripByBudget(Double budget) {
-			return tripRepository.findByBudgetLessThan(budget);
-		}
-		
-		public List<Trip> getTripsByBudgetGreaterThan(Double budget) {
-		    return tripRepository.findByBudgetGreaterThan(budget);
+		public List<TripResponse> getTripsByBudgetGreaterThan(Double budget) {
+
+		    return tripRepository.findByBudgetGreaterThan(budget)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 	
-		public List<Trip> getTripsBySourceAndDestination(String source, String destination) {
-		    return tripRepository.findBySourceAndDestination(source, destination);
+		public List<TripResponse> getTripsBySourceAndDestination(String source,
+                String destination) {
+				return tripRepository.findBySourceAndDestination(source, destination)
+									 .stream()
+									 .map(this::convertToResponse)
+									 .toList();
 		}
 		
-		public List<Trip> getTripsBySourceOrDestination(String source, String destination) {
-		    return tripRepository.findBySourceOrDestination(source, destination);
+		public List<TripResponse> getTripsBySourceOrDestination(String source, String destination) {
+		    return tripRepository.findBySourceOrDestination(source, destination)
+		    					 .stream()
+		    					 .map(this::convertToResponse)
+		    					 .toList();
 		}
 		
-		public List<Trip> getTripsStartingWith(String destination) {
-		    return tripRepository.findByDestinationStartingWith(destination);
+		public List<TripResponse> getTripsStartingWith(String destination) {
+
+		    return tripRepository.findByDestinationStartingWith(destination)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public List<Trip> getTripsEndingWith(String destination) {
-		    return tripRepository.findByDestinationEndingWith(destination);
+		public List<TripResponse> getTripsEndingWith(String destination) {
+
+		    return tripRepository.findByDestinationEndingWith(destination)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public List<Trip> getTripsSortedByBudgetAsc() {
-		    return tripRepository.findByOrderByBudgetAsc();
+		public List<TripResponse> getTripsSortedByBudgetAsc() {
+
+		    return tripRepository.findByOrderByBudgetAsc()
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public List<Trip> getTripsSortedByBudgetDesc() {
-		    return tripRepository.findByOrderByBudgetDesc();
+		public List<TripResponse> getTripsSortedByBudgetDesc() {
+
+		    return tripRepository.findByOrderByBudgetDesc()
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 		
-		public Trip saveTrip(Trip trip) {
-			
-			return tripRepository.save(trip);
+		public TripResponse saveTrip(TripRequest request) {
+
+		    Trip trip = new Trip();
+
+		    trip.setSource(request.getSource());
+		    trip.setDestination(request.getDestination());
+		    trip.setBudget(request.getBudget());
+		    trip.setDays(request.getDays());
+
+		    Trip savedTrip = tripRepository.save(trip);
+
+		    return convertToResponse(savedTrip);
 		}
-	
 		// updating all fields
-		public Trip updateTrip(Long id,TripRequest request) {
-			
-			Trip trip = tripRepository.findById(id).orElseThrow(()-> new TripNotFoundException("trip not found"));
-			
-				trip.setSource(request.getSource());
-			    trip.setDestination(request.getDestination());
-			    trip.setDays(request.getDays());
-			    trip.setBudget(request.getBudget());
-	
-			    return tripRepository.save(trip);
+		public TripResponse updateTrip(Long id, TripRequest request) {
+
+		    Trip trip = tripRepository.findById(id)
+		            .orElseThrow(() -> new TripNotFoundException("Trip not found"));
+
+		    trip.setSource(request.getSource());
+		    trip.setDestination(request.getDestination());
+		    trip.setDays(request.getDays());
+		    trip.setBudget(request.getBudget());
+
+		    Trip updatedTrip = tripRepository.save(trip);
+
+		    return convertToResponse(updatedTrip);
 		}
 		
 		// updating only budget
-		public Trip updateBudget(Long id, Double budget) {
-	
+		public TripResponse updateBudget(Long id, Double budget) {
+
 		    Trip trip = tripRepository.findById(id)
 		            .orElseThrow(() -> new TripNotFoundException("Trip not found"));
-	
+
 		    trip.setBudget(budget);
-	
-		    return tripRepository.save(trip);
+
+		    Trip updatedTrip = tripRepository.save(trip);
+
+		    return convertToResponse(updatedTrip);
 		}
 		
 		
@@ -146,7 +200,7 @@ import com.travel.travelagent.repository.TripRepository;
 			tripRepository.delete(trip);
 		}
 	
-		public Trip saveTrips(Trip trip) {
+		public TripResponse saveTrips(Trip trip) {
 
 		    Long userId = trip.getUser().getId();
 
@@ -155,18 +209,59 @@ import com.travel.travelagent.repository.TripRepository;
 
 		    trip.setUser(user);
 
-		    return tripRepository.save(trip);
+		    Trip savedTrip = tripRepository.save(trip);
+
+		    return convertToResponse(savedTrip);
 		}
 		
-		public List<Trip> getTripsGreaterThan(Double budget){
-		    return tripRepository.findTripsGreaterThanBudget(budget);
+		public List<TripResponse> getTripsGreaterThan(Double budget){
+
+		    return tripRepository.findTripsGreaterThanBudget(budget)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 
-		public List<Trip> getTripsBySourceJPQL(String source){
-		    return tripRepository.findTripsBySource(source);
+		public List<TripResponse> getTripsBySourceJPQL(String source){
+
+		    return tripRepository.findTripsBySource(source)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
 		}
 
-		public List<Trip> searchDestination(String destination){
-		    return tripRepository.searchDestination(destination);
+		public List<TripResponse> searchDestination(String destination){
+
+		    return tripRepository.searchDestination(destination)
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
+		}
+		public List<TripResponse> sortTrips() {
+
+		    return tripRepository.findAll(Sort.by("budget"))
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
+		}
+		public List<TripResponse> sortTripsDesc() {
+
+		    return tripRepository.findAll(
+		            Sort.by(Sort.Direction.DESC, "budget"))
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
+		}
+		public List<TripResponse> sortTrips(String field) {
+
+		    return tripRepository.findAll(Sort.by(field))
+		            .stream()
+		            .map(this::convertToResponse)
+		            .toList();
+		}
+		public Page<TripResponse> pageSort(Pageable pageable) {
+
+		    return tripRepository.findAll(pageable)
+		            .map(this::convertToResponse);
 		}
 	}
