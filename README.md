@@ -312,10 +312,10 @@ Postman Collection can also be used.
 Backend Java Developer
 
 GitHub:
-https://github.com/YOUR_GITHUB_USERNAME
+https://github.com/poojasawale002
 
 LinkedIn:
-https://linkedin.com/in/YOUR_LINKEDIN_PROFILE
+https://www.linkedin.com/in/pooja-sawale/
 
 ---
 
